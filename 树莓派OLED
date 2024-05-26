@@ -1,0 +1,37 @@
+import time
+from PIL import Image, ImageDraw, ImageFont
+from luma.core.interface.serial import i2c
+from luma.oled.device import ssd1306
+import RPi.GPIO as GPIO
+
+# 设置GPIO模式为BCM编号
+GPIO.setmode(GPIO.BCM)
+
+# 初始化I2C接口和OLED设备
+serial = i2c(port=1, address=0x3C)
+device = ssd1306(serial)
+
+# 创建空白图像
+width = device.width
+height = device.height
+image = Image.new('1', (width, height))
+
+# 获取绘图对象
+draw = ImageDraw.Draw(image)
+
+# 加载默认字体
+font = ImageFont.load_default()
+
+# 计算文本尺寸
+text = "戴浩然喜欢虞博超"
+text_bbox = font.getbbox(text)
+text_width = text_bbox[2] - text_bbox[0]
+text_height = text_bbox[3] - text_bbox[1]
+
+# 写入文本
+text_position = ((width - text_width) // 2, (height - text_height) // 2)
+draw.text(text_position, text, fill=255, font=font)
+
+# 显示图像
+device.display(image)
+time.sleep(5000)
